@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Demon Report — QRIS Dashboard</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root{
+  --bg:        #0a0608;
+  --bg2:       #110a0c;
+  --bg3:       #1a0e10;
+  --red:       #c0392b;
+  --red2:      #e74c3c;
+  --crimson:   #8b0000;
+  --gold:      #d4a017;
+  --gold2:     #f0c040;
+  --teal:      #1abc9c;
+  --purple:    #6c3483;
+  --text:      #f0e6d0;
+  --muted:     #9e8c7a;
+  --border:    rgba(192,57,43,0.3);
+  --border2:   rgba(212,160,23,0.25);
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+
+body{
+  font-family:'Inter',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  padding:0 0 40px;
+  position:relative;
+  overflow-x:hidden;
+}
+
+/* ── FLAME PARTICLES BG ── */
+body::before{
+  content:'';
+  position:fixed;
+  inset:0;
+  background:
+    radial-gradient(ellipse 60% 40% at 50% 0%, rgba(139,0,0,0.18) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 60% at 0% 100%, rgba(108,52,131,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 60% at 100% 80%, rgba(192,57,43,0.1) 0%, transparent 60%);
+  pointer-events:none;
+  z-index:0;
+}
+
+/* wisteria vine deco lines */
+body::after{
+  content:'';
+  position:fixed;
+  top:0;left:0;right:0;
+  height:3px;
+  background:linear-gradient(90deg, transparent, var(--red), var(--gold), var(--red), transparent);
+  z-index:10;
+}
+
+.wrap{position:relative;z-index:1;max-width:1080px;margin:0 auto;padding:0 16px}
+
+/* ── HERO HEADER ── */
+.hero{
+  text-align:center;
+  padding:36px 16px 28px;
+  position:relative;
+}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  border:1px solid var(--border);
+  border-radius:4px;
+  padding:5px 18px;
+  font-family:'Inter',sans-serif;
+  font-size:0.65rem;
+  letter-spacing:3px;
+  text-transform:uppercase;
+  color:var(--muted);
+  margin-bottom:14px;
+  background:rgba(139,0,0,0.08);
+}
+.hero-badge span{color:var(--gold);font-weight:700}
+.hero h1{
+  font-family:'Cinzel',serif;
+  font-size:clamp(1.4rem,4vw,2.4rem);
+  font-weight:900;
+  letter-spacing:4px;
+  color:var(--gold2);
+  text-shadow:0 0 40px rgba(212,160,23,0.4);
+  line-height:1.1;
+  margin-bottom:6px;
+}
+.hero h1 em{
+  display:block;
+  font-size:0.45em;
+  letter-spacing:8px;
+  color:var(--red2);
+  font-style:normal;
+  text-shadow:0 0 20px rgba(231,76,60,0.5);
+}
+.hero-sub{
+  font-size:0.75rem;
+  color:var(--muted);
+  letter-spacing:1px;
+}
+/* flame divider */
+.divider{
+  display:flex;align-items:center;gap:12px;
+  margin:20px auto;max-width:600px;
+}
+.divider-line{flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent)}
+.divider-icon{color:var(--red2);font-size:1rem}
+
+/* ── STATS ── */
+.stats{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px;
+  margin-bottom:24px;
+}
+@media(max-width:600px){.stats{grid-template-columns:repeat(2,1fr)}}
+.stat{
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:14px 12px;
+  text-align:center;
+  position:relative;
+  overflow:hidden;
+}
+.stat::before{
+  content:'';
+  position:absolute;
+  top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--crimson),var(--red2));
+}
+.stat .n{
+  font-family:'Cinzel',serif;
+  font-size:1.5rem;
+  font-weight:700;
+  color:var(--gold2);
+  line-height:1;
+}
+.stat .l{
+  font-size:0.62rem;
+  color:var(--muted);
+  text-transform:uppercase;
+  letter-spacing:1.5px;
+  margin-top:4px;
+}
+
+/* ── PANELS ── */
+.panels{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+  margin-bottom:20px;
+}
+@media(max-width:720px){.panels{grid-template-columns:1fr}}
+
+.panel{
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:10px;
+  overflow:hidden;
+}
+.panel-head{
+  background:linear-gradient(90deg,rgba(139,0,0,0.5),rgba(139,0,0,0.1));
+  padding:11px 16px;
+  display:flex;align-items:center;gap:8px;
+  border-bottom:1px solid var(--border);
+}
+.panel-head .icon{font-size:1rem}
+.panel-head h2{
+  font-family:'Cinzel',serif;
+  font-size:0.75rem;
+  font-weight:700;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  color:var(--gold);
+}
+.panel-body{padding:16px}
+
+/* ── FORM FIELDS ── */
+.field{margin-bottom:12px}
+.field label{
+  display:block;
+  font-size:0.62rem;
+  font-weight:600;
+  color:var(--muted);
+  text-transform:uppercase;
+  letter-spacing:1.5px;
+  margin-bottom:5px;
+}
+.field input,
+.field select,
+.field textarea{
+  width:100%;
+  background:rgba(0,0,0,0.4);
+  border:1px solid rgba(192,57,43,0.2);
+  border-radius:6px;
+  padding:9px 11px;
+  color:var(--text);
+  font-size:0.85rem;
+  font-family:'Inter',sans-serif;
+  outline:none;
+  transition:border-color 0.2s;
+}
+.field input:focus,
+.field select:focus,
+.field textarea:focus{border-color:var(--red2)}
+.field textarea{height:62px;resize:vertical}
+.field select option{background:#1a0e10;color:#f0e6d0}
+
+/* ── USER LIST ── */
+.user-list{margin-bottom:12px}
+.user-item{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr 1fr 2fr auto;
+  gap:8px;
+  align-items:end;
+  margin-bottom:8px;
+  padding:10px;
+  background:rgba(0,0,0,0.3);
+  border:1px solid rgba(192,57,43,0.15);
+  border-radius:6px;
+  position:relative;
+}
+@media(max-width:600px){
+  .user-item{grid-template-columns:1fr 1fr;gap:6px}
+  .user-item .btn-del{grid-column:span 2}
+}
+.user-item .field{margin-bottom:0}
+.user-item .field label{font-size:0.58rem}
+.user-num{
+  position:absolute;top:-8px;left:8px;
+  background:var(--crimson);
+  color:#fff;
+  font-size:0.6rem;
+  font-weight:700;
+  padding:2px 7px;
+  border-radius:20px;
+  font-family:'Cinzel',serif;
+  letter-spacing:1px;
+}
+
+.btn{
+  border:none;border-radius:6px;
+  font-family:'Inter',sans-serif;
+  font-weight:600;cursor:pointer;
+  transition:all 0.18s;
+  letter-spacing:0.5px;
+}
+.btn:hover{opacity:0.85;transform:translateY(-1px)}
+.btn-add{
+  width:100%;padding:9px;
+  background:rgba(192,57,43,0.15);
+  border:1px dashed rgba(192,57,43,0.4);
+  color:var(--red2);
+  font-size:0.8rem;
+  border-radius:6px;
+  cursor:pointer;
+  font-family:'Inter',sans-serif;
+  font-weight:600;
+  transition:all 0.18s;
+}
+.btn-add:hover{background:rgba(192,57,43,0.25)}
+.btn-del{
+  padding:8px 10px;
+  background:rgba(139,0,0,0.25);
+  color:#e74c3c;
+  font-size:0.75rem;
+  border:1px solid rgba(139,0,0,0.3);
+  align-self:flex-end;
+}
+.btn-generate{
+  width:100%;padding:13px;
+  background:linear-gradient(90deg,var(--crimson),var(--red2));
+  color:#fff;
+  font-size:0.88rem;
+  font-family:'Cinzel',serif;
+  font-weight:700;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  border-radius:8px;
+  margin-top:6px;
+  box-shadow:0 4px 20px rgba(139,0,0,0.4);
+}
+
+/* ── OUTPUT ── */
+.output-box{
+  background:rgba(0,0,0,0.55);
+  border:1px solid var(--border2);
+  border-radius:8px;
+  padding:16px;
+  font-family:'Courier New',monospace;
+  font-size:0.82rem;
+  line-height:1.9;
+  min-height:100px;
+  white-space:pre-wrap;
+  word-break:break-all;
+  position:relative;
+}
+.placeholder{color:rgba(240,230,208,0.2);font-style:italic;font-size:0.78rem}
+.k{color:var(--gold)}
+.v{color:#f0e6d0}
+.sep{color:rgba(192,57,43,0.5)}
+.uid-block{
+  border-left:2px solid var(--red);
+  padding-left:8px;
+  margin:4px 0;
+}
+.uid-n{color:var(--red2);font-weight:700}
+
+.btn-copy-out{
+  position:absolute;top:10px;right:10px;
+  background:rgba(212,160,23,0.12);
+  border:1px solid rgba(212,160,23,0.3);
+  border-radius:5px;padding:5px 12px;
+  color:var(--gold);font-size:0.68rem;
+  font-weight:700;letter-spacing:1px;
+  cursor:pointer;text-transform:uppercase;
+  transition:all 0.18s;
+}
+.btn-copy-out:hover{background:rgba(212,160,23,0.25)}
+.copy-ok{
+  color:var(--teal);font-size:0.72rem;
+  text-align:right;margin-top:6px;
+  display:none;font-weight:600;
+}
+
+/* bukti preview */
+.bukti-prev{
+  margin-top:12px;
+  border-top:1px solid var(--border);
+  padding-top:12px;
+  text-align:center;
+  min-height:60px;
+}
+.bukti-prev .lbl{
+  font-size:0.62rem;color:var(--muted);
+  text-transform:uppercase;letter-spacing:1.5px;
+  margin-bottom:8px;
+}
+
+/* ── FULL TABLE ── */
+.panel-full{
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:10px;
+  overflow:hidden;
+  margin-bottom:20px;
+}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:0.78rem}
+thead tr{background:rgba(139,0,0,0.2)}
+thead th{
+  padding:10px 12px;text-align:left;
+  color:var(--gold);font-weight:600;
+  letter-spacing:0.5px;
+  border-bottom:1px solid var(--border);
+  white-space:nowrap;
+  font-family:'Cinzel',serif;
+  font-size:0.7rem;
+}
+tbody tr{border-bottom:1px solid rgba(192,57,43,0.08);transition:background 0.15s}
+tbody tr:hover{background:rgba(139,0,0,0.08)}
+tbody td{padding:9px 12px;color:#d4c4b0;vertical-align:middle}
+.badge{
+  display:inline-block;padding:2px 9px;
+  border-radius:20px;font-size:0.65rem;font-weight:700;
+}
+.badge-red{background:rgba(139,0,0,0.25);color:#e74c3c;border:1px solid rgba(139,0,0,0.4)}
+.badge-gold{background:rgba(212,160,23,0.15);color:var(--gold2);border:1px solid rgba(212,160,23,0.3)}
+.badge-teal{background:rgba(26,188,156,0.12);color:var(--teal);border:1px solid rgba(26,188,156,0.25)}
+a.lnk{color:#7ab0ff;font-size:0.72rem;text-decoration:none}
+a.lnk:hover{text-decoration:underline}
+.empty-row td{text-align:center;color:rgba(240,230,208,0.2);font-style:italic;padding:28px;font-size:0.8rem}
+
+.action-btn{
+  padding:4px 8px;border-radius:4px;
+  font-size:0.65rem;font-weight:700;
+  cursor:pointer;border:none;
+  font-family:'Inter',sans-serif;
+  transition:all 0.15s;
+  margin-right:4px;
+}
+.action-btn:hover{opacity:0.8}
+.ab-load{background:rgba(212,160,23,0.15);color:var(--gold);border:1px solid rgba(212,160,23,0.3)}
+.ab-del{background:rgba(139,0,0,0.2);color:#e74c3c;border:1px solid rgba(139,0,0,0.3)}
+
+/* toast */
+.toast{
+  position:fixed;bottom:24px;right:24px;
+  background:linear-gradient(90deg,var(--crimson),var(--red2));
+  color:#fff;padding:12px 20px;
+  border-radius:8px;font-size:0.82rem;
+  font-weight:600;z-index:999;
+  transform:translateY(80px);opacity:0;
+  transition:all 0.3s;
+  box-shadow:0 4px 20px rgba(139,0,0,0.5);
+}
+.toast.show{transform:translateY(0);opacity:1}
+
+/* wisteria pattern top users panel */
+.users-header{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:10px;
+}
+.users-count{
+  font-size:0.65rem;color:var(--muted);
+  background:rgba(139,0,0,0.15);
+  padding:3px 10px;border-radius:20px;
+  border:1px solid var(--border);
+}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">&#9876; Kimetsu no Yaiba &nbsp;|&nbsp; <span>Demon Report System</span></div>
+  <h1>
+    <em>&#9670; LAPORAN QRIS &#9670;</em>
+    DEMON SLAYER
+  </h1>
+  <p class="hero-sub">Sistem pelaporan multi user — satu reportan, banyak jiwa</p>
+  <div class="divider">
+    <div class="divider-line"></div>
+    <div class="divider-icon">&#128293;</div>
+    <div class="divider-line"></div>
+  </div>
+</div>
+
+<div class="wrap">
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat">
+    <div class="n" id="st-total">0</div>
+    <div class="l">Total Laporan</div>
+  </div>
+  <div class="stat">
+    <div class="n" id="st-hari">0</div>
+    <div class="l">Hari Ini</div>
+  </div>
+  <div class="stat">
+    <div class="n" id="st-user">0</div>
+    <div class="l">Total User</div>
+  </div>
+  <div class="stat">
+    <div class="n" id="st-nominal" style="font-size:1rem">0</div>
+    <div class="l">Total Nominal</div>
+  </div>
+</div>
+
+<!-- PANELS -->
+<div class="panels">
+
+  <!-- FORM -->
+  <div class="panel">
+    <div class="panel-head">
+      <span class="icon">&#9998;</span>
+      <h2>Form Laporan</h2>
+    </div>
+    <div class="panel-body">
+
+      <div class="field">
+        <label>Info (Nama Situs)</label>
+        <input type="text" id="f-info" value="UDINTOGEL" placeholder="contoh: UDINTOGEL"/>
+      </div>
+      <div class="field">
+        <label>Perihal</label>
+        <select id="f-perihal">
+          <option>Cek bukti QRIS P2MIH</option>
+          <option>Cek bukti QRIS</option>
+          <option>Cek bukti Transfer</option>
+          <option>Cek bukti Deposit</option>
+          <option>Laporan Transaksi</option>
+          <option value="custom">Lainnya...</option>
+        </select>
+      </div>
+      <div class="field" id="custom-wrap" style="display:none">
+        <label>Perihal Manual</label>
+        <input type="text" id="f-perihal-custom" placeholder="Tulis perihal..."/>
+      </div>
+
+      <!-- MULTI USER LIST -->
+      <div style="margin:14px 0 8px">
+        <div class="users-header">
+          <label style="font-size:0.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;font-weight:600">Daftar User ID</label>
+          <span class="users-count" id="user-count-badge">0 user</span>
+        </div>
+        <div class="user-list" id="user-list"></div>
+        <button class="btn-add" onclick="tambahUser()">+ Tambah User ID</button>
+      </div>
+
+      <div class="field">
+        <label>Link Bukti Utama</label>
+        <textarea id="f-bukti" placeholder="Paste link gambar bukti..."></textarea>
+      </div>
+
+      <button class="btn btn-generate" onclick="generate()">&#9876; Generate Reportan</button>
+    </div>
+  </div>
+
+  <!-- OUTPUT -->
+  <div class="panel">
+    <div class="panel-head">
+      <span class="icon">&#128196;</span>
+      <h2>Hasil Reportan</h2>
+    </div>
+    <div class="panel-body">
+      <div class="output-box" id="out-box">
+        <button class="btn-copy-out" id="btn-cp" onclick="salin()" style="display:none">&#128203; Salin</button>
+        <div id="out-placeholder" class="placeholder">Isi form lalu klik Generate Reportan...</div>
+        <div id="out-content" style="display:none"></div>
+      </div>
+      <div class="copy-ok" id="cp-ok">&#10003; Berhasil disalin!</div>
+
+      <div class="bukti-prev">
+        <div class="lbl">Preview Bukti</div>
+        <div id="bukti-prev-area" style="color:rgba(240,230,208,0.2);font-size:0.78rem;font-style:italic">
+          Bukti tampil di sini...
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- RIWAYAT TABLE -->
+<div class="panel-full">
+  <div class="panel-head">
+    <span class="icon">&#128218;</span>
+    <h2>Riwayat Laporan</h2>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Waktu</th>
+          <th>Info</th>
+          <th>Perihal</th>
+          <th>Jumlah User</th>
+          <th>User IDs</th>
+          <th>Nominal Total</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody id="tbl-body">
+        <tr class="empty-row"><td colspan="8">Belum ada laporan. Mulai dengan generate laporan pertama.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+</div><!-- wrap -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+var riwayat = [];
+try{ riwayat = JSON.parse(localStorage.getItem('ds_riwayat') || '[]'); }catch(e){ riwayat = []; }
+
+var userCount = 0;
+
+document.getElementById('f-perihal').addEventListener('change', function(){
+  document.getElementById('custom-wrap').style.display = this.value === 'custom' ? 'block' : 'none';
+});
+
+function getPerihal(){
+  var v = document.getElementById('f-perihal').value;
+  return v === 'custom' ? (document.getElementById('f-perihal-custom').value.trim() || 'Lainnya') : v;
+}
+
+function tambahUser(){
+  userCount++;
+  var uid = 'u' + Date.now();
+  var div = document.createElement('div');
+  div.className = 'user-item';
+  div.setAttribute('data-uid', uid);
+
+  var fields = [
+    { label: 'User ID',   cls: 'uid',   type: 'text',   ph: 'contoh: adangs2233', val: '' },
+    { label: 'Reff ID',   cls: 'ureff', type: 'text',   ph: '-',                  val: '-' },
+    { label: 'RRN',       cls: 'urrn',  type: 'text',   ph: '615769124004',       val: '' },
+    { label: 'Nominal',   cls: 'unom',  type: 'number', ph: '100500',             val: '' },
+    { label: 'Link Bukti',cls: 'ubukti',type: 'text',   ph: 'https://...',        val: '' }
+  ];
+  fields.forEach(function(f){
+    var wrap = document.createElement('div');
+    wrap.className = 'field';
+    var lbl = document.createElement('label');
+    lbl.textContent = f.label;
+    var inp = document.createElement('input');
+    inp.type = f.type;
+    inp.className = f.cls;
+    inp.placeholder = f.ph;
+    inp.value = f.val;
+    wrap.appendChild(lbl);
+    wrap.appendChild(inp);
+    div.appendChild(wrap);
+  });
+
+  var btn = document.createElement('button');
+  btn.className = 'btn btn-del';
+  btn.textContent = 'Hapus';
+  btn.onclick = function(){ hapusUser(uid); };
+  div.appendChild(btn);
+
+  document.getElementById('user-list').appendChild(div);
+  updateUserCount();
+}
+
+function hapusUser(uid){
+  var items = document.querySelectorAll('.user-item');
+  items.forEach(function(el){
+    if(el.getAttribute('data-uid') === uid){
+      el.parentNode.removeChild(el);
+    }
+  });
+  updateUserCount();
+}
+
+function updateUserCount(){
+  var n = document.querySelectorAll('.user-item').length;
+  document.getElementById('user-count-badge').textContent = n + ' user';
+}
+
+function fmtNum(n){
+  var s = String(n||'').replace(/\D/g,'');
+  return parseInt(s||0).toLocaleString('id-ID');
+}
+
+function getNow(){
+  return new Date().toLocaleString('id-ID',{
+    day:'2-digit', month:'2-digit', year:'numeric',
+    hour:'2-digit', minute:'2-digit', second:'2-digit'
+  });
+}
+
+function showToast(msg){
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 2500);
+}
+
+function generate(){
+  var items = document.querySelectorAll('.user-item');
+  if(items.length === 0){ showToast('Tambah minimal 1 User ID!'); return; }
+
+  var info    = document.getElementById('f-info').value.trim() || 'UDINTOGEL';
+  var perihal = getPerihal();
+  var waktu   = getNow();
+
+  var users = [];
+  items.forEach(function(el){
+    var uid   = el.querySelector('.uid').value.trim()    || '-';
+    var reff  = el.querySelector('.ureff').value.trim()  || '-';
+    var rrn   = el.querySelector('.urrn').value.trim()   || '-';
+    var nom   = el.querySelector('.unom').value.trim()   || '0';
+    var bukti = el.querySelector('.ubukti').value.trim() || '-';
+    users.push({ uid: uid, reff: reff, rrn: rrn, nom: nom, bukti: bukti });
+  });
+
+  var totalNom = users.reduce(function(s,u){
+    return s + parseInt(String(u.nom).replace(/\D/g,'')||0);
+  }, 0);
+
+  /* ── Build teks reportan ── */
+  var lines = [];
+  lines.push('Info     : ' + info);
+  lines.push('Perihal  : ' + perihal);
+  lines.push('');
+  users.forEach(function(u, i){
+    lines.push('User ID  : ' + u.uid);
+    lines.push('Reff ID  : ' + u.reff);
+    lines.push('RRN      : ' + u.rrn);
+    lines.push('Nominal  : ' + fmtNum(u.nom));
+    lines.push('Bukti    : ' + u.bukti);
+    if(i < users.length - 1) lines.push('');
+  });
+  var teks = lines.join('\n');
+
+  /* ── Build HTML output ── */
+  var html = '';
+  lines.forEach(function(line){
+    if(line === ''){ html += '\n'; return; }
+    var idx = line.indexOf(':');
+    if(idx > -1){
+      var k = escHtml(line.slice(0, idx+1));
+      var v = escHtml(line.slice(idx+1));
+      html += '<span class="k">' + k + '</span><span class="v">' + v + '</span>\n';
+    } else {
+      html += escHtml(line) + '\n';
+    }
+  });
+
+  document.getElementById('out-placeholder').style.display = 'none';
+  document.getElementById('btn-cp').style.display = 'inline-block';
+  var oc = document.getElementById('out-content');
+  oc.innerHTML = html;
+  oc.style.display = 'block';
+
+  /* ── Preview bukti (semua user) ── */
+  var bp = document.getElementById('bukti-prev-area');
+  bp.innerHTML = '';
+  var hasBukti = false;
+  users.forEach(function(u, i){
+    if(u.bukti && u.bukti.startsWith('http')){
+      hasBukti = true;
+      var lbl = document.createElement('div');
+      lbl.style.cssText = 'font-size:0.65rem;color:var(--muted);margin:10px 0 4px;letter-spacing:1px;';
+      lbl.textContent = 'User ID: ' + u.uid;
+      bp.appendChild(lbl);
+      var imgEl = new Image();
+      imgEl.style.cssText = 'max-width:100%;max-height:160px;border-radius:6px;border:1px solid rgba(192,57,43,0.3);object-fit:contain;display:block;margin-bottom:4px;';
+      imgEl.alt = 'Bukti ' + u.uid;
+      var buktiUrl = u.bukti;
+      imgEl.onerror = function(){
+        var errSpan = document.createElement('span');
+        errSpan.style.cssText = 'color:#e74c3c;font-size:0.72rem;';
+        errSpan.textContent = 'Gambar tidak dapat dimuat. ';
+        var lnkErr = document.createElement('a');
+        lnkErr.href = buktiUrl; lnkErr.target = '_blank';
+        lnkErr.style.color = '#7ab0ff';
+        lnkErr.textContent = 'Buka link';
+        errSpan.appendChild(lnkErr);
+        bp.appendChild(errSpan);
+      };
+      imgEl.src = u.bukti;
+      bp.appendChild(imgEl);
+      var lnk = document.createElement('a');
+      lnk.href = u.bukti; lnk.target = '_blank';
+      lnk.className = 'lnk';
+      lnk.style.cssText = 'font-size:0.72rem;display:inline-block;margin-bottom:8px;';
+      lnk.textContent = 'Buka Bukti';
+      bp.appendChild(lnk);
+    }
+  });
+  if(!hasBukti){
+    bp.innerHTML = '<span style="color:rgba(240,230,208,0.2);font-size:0.78rem;font-style:italic">Tidak ada link bukti.</span>';
+  }
+
+  var entry = {
+    id: Date.now(), waktu: waktu, info: info, perihal: perihal,
+    users: users, totalNom: totalNom, teks: teks
+  };
+  riwayat.unshift(entry);
+  try{ localStorage.setItem('ds_riwayat', JSON.stringify(riwayat)); }catch(e){}
+  renderTable();
+  updateStats();
+  showToast('Reportan berhasil dibuat!');
+}
+
+function escHtml(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function salin(){
+  var rawText = document.getElementById('out-content').innerText;
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(rawText).then(function(){
+      showCopyOk();
+    }).catch(function(){
+      fallbackCopy(rawText);
+    });
+  } else {
+    fallbackCopy(rawText);
+  }
+}
+
+function fallbackCopy(text){
+  var ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.cssText = 'position:fixed;top:-9999px;left:-9999px;';
+  document.body.appendChild(ta);
+  ta.focus(); ta.select();
+  try{ document.execCommand('copy'); showCopyOk(); }catch(e){ showToast('Gagal salin!'); }
+  document.body.removeChild(ta);
+}
+
+function showCopyOk(){
+  var el = document.getElementById('cp-ok');
+  el.style.display = 'block';
+  showToast('Teks berhasil disalin!');
+  setTimeout(function(){ el.style.display = 'none'; }, 2500);
+}
+
+function hapusEntry(id){
+  riwayat = riwayat.filter(function(r){ return r.id !== id; });
+  try{ localStorage.setItem('ds_riwayat', JSON.stringify(riwayat)); }catch(e){}
+  renderTable();
+  updateStats();
+  showToast('Laporan dihapus.');
+}
+
+function loadEntry(id){
+  var r = riwayat.find(function(x){ return x.id === id; });
+  if(!r) return;
+  document.getElementById('f-info').value = r.info;
+  var sel = document.getElementById('f-perihal');
+  var opts = Array.from(sel.options).map(function(o){ return o.value; });
+  if(opts.indexOf(r.perihal) > -1){ sel.value = r.perihal; }
+  else {
+    sel.value = 'custom';
+    document.getElementById('custom-wrap').style.display = 'block';
+    document.getElementById('f-perihal-custom').value = r.perihal;
+  }
+  document.getElementById('user-list').innerHTML = '';
+  userCount = 0;
+  r.users.forEach(function(u){
+    tambahUser();
+    var items = document.querySelectorAll('.user-item');
+    var last  = items[items.length - 1];
+    last.querySelector('.uid').value    = u.uid;
+    last.querySelector('.ureff').value  = u.reff;
+    last.querySelector('.urrn').value   = u.rrn  || '';
+    last.querySelector('.unom').value   = u.nom;
+    last.querySelector('.ubukti').value = u.bukti || '';
+  });
+  generate();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function renderTable(){
+  var tbody = document.getElementById('tbl-body');
+  if(!riwayat.length){
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="8">Belum ada laporan.</td></tr>';
+    return;
+  }
+  var html = '';
+  riwayat.forEach(function(r, i){
+    var uids = r.users.map(function(u){ return u.uid; }).join(', ');
+    html += '<tr>'
+      + '<td style="color:var(--gold);font-family:Cinzel,serif;font-weight:700">' + (riwayat.length - i) + '</td>'
+      + '<td style="font-size:0.7rem;color:var(--muted);white-space:nowrap">' + r.waktu + '</td>'
+      + '<td><span class="badge badge-red">' + escHtml(r.info) + '</span></td>'
+      + '<td style="font-size:0.75rem">' + escHtml(r.perihal) + '</td>'
+      + '<td style="text-align:center"><span class="badge badge-gold">' + r.users.length + ' user</span></td>'
+      + '<td style="font-size:0.72rem;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + escHtml(uids) + '">' + escHtml(uids) + '</td>'
+      + '<td style="color:var(--teal);font-weight:600">' + fmtNum(r.totalNom) + '</td>'
+      + '<td style="white-space:nowrap">'
+      + '<button class="action-btn ab-load" onclick="loadEntry(' + r.id + ')">Load</button>'
+      + '<button class="action-btn ab-del" onclick="hapusEntry(' + r.id + ')">Hapus</button>'
+      + '</td></tr>';
+  });
+  tbody.innerHTML = html;
+}
+
+function updateStats(){
+  document.getElementById('st-total').textContent = riwayat.length;
+  var today = new Date().toDateString();
+  var hari = riwayat.filter(function(r){ return new Date(r.id).toDateString() === today; }).length;
+  document.getElementById('st-hari').textContent = hari;
+  var totalUser = riwayat.reduce(function(s,r){ return s + (r.users ? r.users.length : 0); }, 0);
+  document.getElementById('st-user').textContent = totalUser;
+  var totalNom = riwayat.reduce(function(s,r){ return s + parseInt(r.totalNom||0); }, 0);
+  var nomEl = document.getElementById('st-nominal');
+  if(totalNom >= 1000000){ nomEl.textContent = (totalNom/1000000).toFixed(1) + 'M'; }
+  else if(totalNom >= 1000){ nomEl.textContent = (totalNom/1000).toFixed(0) + 'K'; }
+  else { nomEl.textContent = fmtNum(totalNom); }
+}
+
+tambahUser();
+renderTable();
+updateStats();
+</script>
+</body>
+</html>
